@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'pantalla_inicio.dart';
-import 'pantalla_detalles_producto.dart';
+import 'screens/pantalla_inicio.dart';
+import 'screens/pantalla_cotizacion.dart';
+import 'screens/pantalla_detalles_producto.dart';
+import 'screens/registro.dart';
 import 'screens/login.dart';
 
 void main() {
@@ -16,8 +18,9 @@ class MyApp extends StatelessWidget {
       title: 'NutriStock',
       debugShowCheckedModeBanner: false,
       initialRoute: '/',
-      onGenerateRoute: (settings) { //genera la ruta
-        switch (settings.name) {
+      //onGenerateRoute se usa para generar rutas que requieren pasar argumentos o datos adicionales a la pantalla que se esta navegando
+      onGenerateRoute: (settings) { 
+        switch (settings.name) { //selecciona la ruta
           case '/inicio':
             final args = settings.arguments as Map<String, String>;
             return MaterialPageRoute(
@@ -26,14 +29,28 @@ class MyApp extends StatelessWidget {
                 email: args['email']!, //correo del usuario
               ),
             );
+            case '/cotizacion':
+            final args = settings.arguments as Map<String, dynamic>;
+            return MaterialPageRoute(
+              builder: (_) => PantallaCotizacion(
+                productosEnCotizacion: args['productosEnCarrito'],
+              ),
+            );
+            case '/detalles_producto': // Nueva ruta para detalles de producto
+            final args = settings.arguments as Map<String, dynamic>;
+            return MaterialPageRoute(
+              builder: (_) => PantallaDetallesProducto(
+                producto: args['producto'],
+              ),
+            );
           default:
             throw Exception('Ruta no definida'); 
         }
       },
-      routes: {
+//routes se usa mas para generar rutas que no requieren pasar argumentos o datos adicionales a la pantalla que se esta navegando
+      routes: { 
         '/': (context) => const Login(),        
-        '/detalles_producto': (context) => const PantallaDetallesProducto(),
-        '/productos_categoria': (context) => const PantallaDetallesProducto(),
+        '/registro': (context) => const Registro(),
       },
       theme: ThemeData(
         primarySwatch: Colors.blue,
