@@ -1,24 +1,32 @@
-const express = require("express");
-const MongoClient = require("mongodb").MongoClient;
-const cors = require("cors");
-const bodyParser = require("body-parser");
+const express = require("express"); // Importar el paquete express
+const MongoClient = require("mongodb").MongoClient; // Importar el paquete mongodb
+const cors = require("cors"); // Importar el paquete cors que permite peticiones entre servidores
+const bodyParser = require("body-parser"); // Importar el paquete body-parser que permite leer el cuerpo de las peticiones
 
-const app = express();
-app.use(cors());
-app.use(bodyParser.json());
+const app = express(); // Crear una instancia de express
+app.use(cors()); // Habilitar las peticiones entre servidores
+app.use(bodyParser.json()); // Habilitar la lectura del cuerpo de las peticiones
 
 const uri =
-  "mongodb+srv://alejandrodeveloper417:ccwh0XVcnzfphfT3@nutristock.fpenfkp.mongodb.net/nutristock";
+  "mongodb+srv://alejandrodeveloper417:ccwh0XVcnzfphfT3@nutristock.fpenfkp.mongodb.net/nutristock"; // URI de la base de datos
 
-const client = new MongoClient(uri);
+const client = new MongoClient(uri); // Crear una instancia del cliente de MongoDB
+
+//peticiones http
+//200 quiere decir que todo esta bien
+//500 quiere decir que hubo un error en el servidor
+//404 quiere decir que no se encontro la pagina
+//401 quiere decir que no estas autorizado para ver la pagina
+//400 quiere decir que hubo un error en la peticion
 
 app.get("/data", async (req, res) => {
+  // Ruta para obtener los datos
   try {
-    await client.connect();
-    const collection = client.db("users").collection("workers");
-    const data = await collection.find({}).toArray();
-    console.log(data);
-    res.json(data);
+    await client.connect(); // Conectar a la base de datos
+    const collection = client.db("users").collection("workers"); // Conexión a la base de datos y colección
+    const data = await collection.find({}).toArray(); // Obtener los datos de la colección
+    console.log(data); // Mostrar los datos en consola
+    res.json(data); // Enviar los datos como respuesta
   } catch (err) {
     console.error(err);
     res.status(500).send("Error connecting to database");
@@ -54,17 +62,19 @@ app.get("/productos", async (req, res) => {
 });
 
 app.post("/login", async (req, res) => {
-  const { email, password } = req.body;
+  // Ruta para iniciar sesión
+  const { email, password } = req.body; // Obtener el correo electrónico y la contraseña del cuerpo de la petición
 
   try {
-    await client.connect();
-    const collection = client.db("users").collection("workers");
-    const user = await collection.findOne({ email, password });
+    await client.connect(); // Conectar a la base de datos
+    const collection = client.db("users").collection("workers"); // Conexión a la base de datos y colección
+    const user = await collection.findOne({ email, password }); // Buscar un usuario con el correo electrónico y la contraseña
 
     if (user) {
-      res.status(200).send({ authenticated: true, nombre: user.nombre });
+      // Si se encontró un usuario
+      res.status(200).send({ authenticated: true, nombre: user.nombre }); // Enviar una respuesta con el nombre del usuario
     } else {
-      res.status(401).send({ authenticated: false });
+      res.status(401).send({ authenticated: false }); // Enviar una respuesta de no autorizado
     }
   } catch (err) {
     console.error(err);
@@ -75,15 +85,16 @@ app.post("/login", async (req, res) => {
 });
 
 app.post("/register", async (req, res) => {
-  const { nombre, email, password } = req.body;
+  // Ruta para registrar un usuario
+  const { nombre, email, password } = req.body; // Obtener el nombre, correo electrónico y contraseña del cuerpo de la petición
 
   try {
     await client.connect();
     const collection = client.db("users").collection("workers");
-    const user = await collection.findOne({ email });
+    const user = await collection.findOne({ email }); // Buscar un usuario con el correo electrónico
 
     if (user) {
-      res.status(400).send("El correo electrónico ya está en uso");
+      res.status(400).send("El correo electrónico ya está en uso"); // Enviar un mensaje de error si el correo electrónico ya está en uso
     } else {
       await collection.insertOne({ nombre, email, password });
       res.sendStatus(200);
