@@ -43,10 +43,15 @@ app.get("/productos", async (req, res) => {
     await client.connect();
     const collection = client.db("store").collection("products"); // Conexión a la base de datos y colección
     const categoria = req.query.categoria; // Obtener la categoría de la URL
+    const nombre = req.query.nombre;
     let filter = {};
 
     if (categoria) {
-      filter = { category: categoria }; // Si hay una categoría, se filtra por ella
+      filter.category = categoria; //
+    }
+
+    if (nombre) {
+      filter.name = { $regex: new RegExp(`^${nombre}`, "i") };
     }
 
     console.log("Filter:", filter); // Mostrar el filtro en consola

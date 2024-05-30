@@ -56,7 +56,7 @@ class PantallaDetallesProducto extends StatelessWidget {
               children: [
                 const Spacer(),
                 Text(
-                  '\$${producto['precio']}',
+                  '\$${producto['precio'].toStringAsFixed(2)}',
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 24,
@@ -71,6 +71,7 @@ class PantallaDetallesProducto extends StatelessWidget {
               style: const TextStyle(fontSize: 18),
             ),
             const SizedBox(height: 8),
+
           ],
         ),
       ),

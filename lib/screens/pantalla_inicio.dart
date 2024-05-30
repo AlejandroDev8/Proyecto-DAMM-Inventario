@@ -1,89 +1,83 @@
-import 'package:flutter/material.dart'; // Importa el paquete de material design
-import 'package:http/http.dart'
-    as http; // Importa el paquete http para realizar peticiones
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-Future<List<Map<String, dynamic>>> obtenerProductos({String? categoria}) async {
-  // Función para obtener los productos de la base de datos
+// Fetch products from the server with optional filtering by category or name
+Future<List<Map<String, dynamic>>> obtenerProductos(
+    {String? categoria, String? nombre}) async {
   try {
-    // Manejo de errores
-    final url = categoria != null &&
-            categoria !=
-                'Todos' // Si la categoría no es nula y no es 'Todos' entonces obtén los productos por categoría
-        ? 'http://localhost:3000/productos?categoria=${Uri.encodeComponent(categoria)}' // URL con la categoría
-        : 'http://localhost:3000/productos'; // URL sin categoría
+    String url;
+    // Build the URL based on the category and name parameters
+    if (categoria != null && categoria != 'Todos') {
+      url =
+          'http://localhost:3000/productos?categoria=${Uri.encodeComponent(categoria)}';
+    } else if (nombre != null && nombre.isNotEmpty) {
+      url =
+          'http://localhost:3000/productos?nombre=${Uri.encodeComponent(nombre)}';
+    } else {
+      url = 'http://localhost:3000/productos';
+    }
 
-    print('Requesting URL: $url'); // Log para verificar la URL solicitada
+    print('Requesting URL: $url');
 
-    final response =
-        await http.get(Uri.parse(url)); // Realiza una petición GET a la URL
+    final response = await http.get(Uri.parse(url));
 
     if (response.statusCode == 200) {
-      // Si la petición fue exitosa
-      List productos = jsonDecode(response
-          .body); // Decodifica la respuesta a JSON y obtén los productos
+      List productos = jsonDecode(response.body);
       return productos
           .map((producto) => {
-                // Mapea los productos a un mapa de datos
                 'id': producto['_id'],
                 'nombre': producto['name'],
                 'descripcion': producto['description'],
-                'precio': double.parse(producto['price']
-                    .toString()), // Asegúrate de convertir a double
+                'precio': double.parse(producto['price'].toString()),
                 'categoria': producto['category'],
-                'stock': int.parse(producto['stock']
-                    .toString()), // Asegúrate de convertir a int
+                'stock': int.parse(producto['stock'].toString()),
                 'imagen': producto['image'],
               })
-          .toList(); // Convierte a lista
+          .toList();
     } else {
       throw Exception(
-          'Fallo al cargar los productos, código de estado: ${response.statusCode}'); // Lanza una excepción si la petición falla
+          'Failed to load products, status code: ${response.statusCode}');
     }
   } catch (e) {
-    print('Error al obtener los productos: $e');
+    print('Error fetching products: $e');
     rethrow;
   }
 }
 
 class PantallaInicio extends StatefulWidget {
-  final String nombre; // Atributo nombre de tipo String requerido
-  final String email; // Atributo email de tipo String requerido
+  final String nombre;
+  final String email;
 
-  const PantallaInicio({
-    // Constructor de la clase PantallaInicio con los parámetros requeridos nombre y email
-    super.key,
-    required this.nombre,
-    required this.email,
-  });
+  const PantallaInicio({super.key, required this.nombre, required this.email});
 
   @override
   State<PantallaInicio> createState() => _PantallaInicio();
 }
 
 class _PantallaInicio extends State<PantallaInicio> {
-  // Estado de la clase PantallaInicio
-  Future<List<Map<String, dynamic>>>?
-      productos; // Variable de tipo Future que contendrá los productos a obtener
-  String categoriaSeleccionada =
-      'Todos'; // Variable de tipo String para la categoría seleccionada por defecto
-  List<Map<String, dynamic>> productosEnCarrito =
-      []; // Lista de productos que se agregan a la cotización
+  Future<List<Map<String, dynamic>>>? productos;
+  String categoriaSeleccionada = 'Todos';
+  String nombreBusqueda = '';
+  List<Map<String, dynamic>> productosEnCarrito = [];
 
   @override
   void initState() {
-    // Método initState para inicializar el estado del widget antes de que se construya
     super.initState();
     productos = obtenerProductos();
   }
 
   void cargarProductosPorCategoria(String? categoria) {
-    // Método para cargar los productos por categoría seleccionada
     setState(() {
-      categoriaSeleccionada =
-          categoria ?? 'Todos'; // Actualiza la categoría seleccionada
-      productos = obtenerProductos(
-          categoria: categoria); // Obtiene los productos por categoría
+      categoriaSeleccionada = categoria ?? 'Todos';
+      productos = obtenerProductos(categoria: categoria);
+    });
+  }
+
+  void cargarProductosPorNombre(String? nombre) {
+    setState(() {
+      nombreBusqueda = nombre ?? '';
+      productos = obtenerProductos(nombre: nombre);
     });
   }
 
@@ -92,28 +86,21 @@ class _PantallaInicio extends State<PantallaInicio> {
   }
 
   void agregarProductoACarrito(Map<String, dynamic> producto, int cantidad) {
-    // Método para agregar un producto a la cotización
     setState(() {
-      producto['cantidad'] = cantidad; // Actualiza la cantidad del producto
-      productosEnCarrito.add(producto); // Agrega el producto a la cotización
+      producto['cantidad'] = cantidad;
+      productosEnCarrito.add(producto);
     });
   }
 
   void navegarACotizacion() {
-    // Método para navegar a la pantalla de cotización
-    Navigator.pushNamed(
-      context,
-      '/cotizacion',
-      arguments: {
-        'productosEnCarrito': productosEnCarrito
-      }, // Argumentos a enviar a la pantalla de cotización
-    );
+    Navigator.pushNamed(context, '/cotizacion',
+        arguments: {'productosEnCarrito': productosEnCarrito});
   }
 
   @override
   Widget build(BuildContext context) {
+    final busquedaController = TextEditingController();
     final List<String> categorias = [
-      // Lista de categorías de productos
       'Todos',
       'BEBIDAS DE PROTEINA',
       'BARRAS DE PROTEINAS',
@@ -123,7 +110,6 @@ class _PantallaInicio extends State<PantallaInicio> {
       'PROTEINAS DE SUERO DE LECHE'
     ];
     List<ListTile> tiles = [
-      // Lista de elementos de la barra lateral
       ListTile(
           title: const Text("Inicio"),
           leading: const Icon(Icons.home),
@@ -169,7 +155,7 @@ class _PantallaInicio extends State<PantallaInicio> {
 
     return Scaffold(
       appBar: AppBar(
-        iconTheme: const IconThemeData(color: Colors.white), // Tema de iconos
+        iconTheme: const IconThemeData(color: Colors.white),
         backgroundColor: const Color(0xff283673),
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -216,6 +202,26 @@ class _PantallaInicio extends State<PantallaInicio> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Center(
+                child: Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 20.0, vertical: 5.0),
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(30.0),
+                  border: Border.all(color: Colors.blueAccent)),
+              child: TextFormField(
+                controller: busquedaController,
+                decoration: InputDecoration(
+                    labelText: "Buscar producto",
+                    suffix: InkWell(
+                      onTap: () {
+                        cargarProductosPorNombre(busquedaController.text); 
+                      },
+                      child: const Icon(Icons.search),
+                    )),
+              ),
+            )),
+            const SizedBox(height: 7),
+            Center(
               child: Container(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 20.0, vertical: 5.0),
@@ -224,29 +230,21 @@ class _PantallaInicio extends State<PantallaInicio> {
                   border: Border.all(color: Colors.blueAccent),
                 ),
                 child: DropdownButtonHideUnderline(
-                  // Oculta la línea del DropdownButton
                   child: DropdownButton<String>(
-                    // DropdownButton para seleccionar la categoría
-                    value:
-                        categoriaSeleccionada, // Valor de la categoría seleccionada
+                    value: categoriaSeleccionada,
                     onChanged: (String? nuevoValor) {
-                      // Método para cambiar la categoría seleccionada
                       setState(() {
-                        categoriaSeleccionada = nuevoValor ??
-                            'Todos'; // Actualiza la categoría seleccionada
+                        categoriaSeleccionada = nuevoValor ?? 'Todos';
                       });
-                      cargarProductosPorCategoria(
-                          nuevoValor); // Carga los productos por la categoría seleccionada
+                      cargarProductosPorCategoria(nuevoValor);
                     },
                     items: categorias
                         .map<DropdownMenuItem<String>>((String categoria) {
-                      // Mapea las categorías a un DropdownMenuItem
                       return DropdownMenuItem<String>(
-                        // Retorna un DropdownMenuItem con la categoría
                         value: categoria,
                         child: Text(categoria),
                       );
-                    }).toList(), // Convierte a lista
+                    }).toList(),
                     style: const TextStyle(
                       fontSize: 16,
                       color: Colors.black87,
@@ -261,28 +259,20 @@ class _PantallaInicio extends State<PantallaInicio> {
             ),
             const SizedBox(height: 10),
             Expanded(
-              // Widget que se expande para llenar el espacio disponible
               child: FutureBuilder<List<Map<String, dynamic>>>(
-                // FutureBuilder para construir la lista de productos
                 future: productos,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    // Si la conexión está en espera
                     return const Center(
-                      // Muestra un indicador de progreso
                       child: CircularProgressIndicator(),
                     );
                   } else if (snapshot.hasError) {
-                    // Si hay un error
                     return Center(
-                      child:
-                          Text('Error: ${snapshot.error}'), // Muestra el error
+                      child: Text('Error: ${snapshot.error}'),
                     );
                   } else {
-                    List<Map<String, dynamic>> productos =
-                        snapshot.data ?? []; // Obtiene los productos
+                    List<Map<String, dynamic>> productos = snapshot.data ?? [];
                     return GridView.builder(
-                      // Construye un GridView con los productos
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
@@ -322,16 +312,16 @@ class TarjetaProducto extends StatefulWidget {
   });
 
   @override
-  _TarjetaProductoState createState() => _TarjetaProductoState();
+  State<TarjetaProducto> createState() => _TarjetaProducto();
 }
 
-class _TarjetaProductoState extends State<TarjetaProducto> {
+class _TarjetaProducto extends State<TarjetaProducto> {
   int cantidad = 1;
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () {
+      onTap:(){
         Navigator.pushNamed(
           context,
           '/detalles_producto',
@@ -339,41 +329,40 @@ class _TarjetaProductoState extends State<TarjetaProducto> {
         );
       },
       child: Card(
-        elevation: 5,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15),
-        ),
-        child: SingleChildScrollView(
+        elevation: 4.0,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Center(
                 child: ClipRRect(
-                  borderRadius: const BorderRadius.only(
+                  borderRadius:const BorderRadius.only(
                     topLeft: Radius.circular(15),
                     topRight: Radius.circular(15),
                   ),
                   child: Image.network(
-                    widget.producto['imagen'],
-                    height: 100,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return const Icon(Icons.broken_image, size: 100);
-                    },
-                  ),
+                      widget.producto['imagen'],
+                      height: 100,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return const Icon(Icons.broken_image, size: 100);
+                      },
+                    ),
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  widget.producto['nombre'] ?? 'Nombre no disponible',
-                  style: const TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.bold,
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    widget.producto['nombre'] ?? 'Nombre no disponible',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
-              ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Row(
@@ -381,7 +370,7 @@ class _TarjetaProductoState extends State<TarjetaProducto> {
                   children: [
                     Text(
                       widget.producto['precio'] != null
-                          ? '\$${widget.producto['precio']}'
+                          ? '\$${widget.producto['precio'].toStringAsFixed(2)}'
                           : 'Precio no disponible',
                       style: const TextStyle(
                           fontWeight: FontWeight.bold,
@@ -423,25 +412,14 @@ class _TarjetaProductoState extends State<TarjetaProducto> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(3.0),
                 child: Center(
                   child: ElevatedButton(
                     onPressed: () {
                       widget.agregarProductoACotizacion(
                           widget.producto, cantidad);
-                      // final snackBar = SnackBar(
-                      //   content: Text('Producto añadido a cotizacion'),
-                      //   action: SnackBarAction(
-                      //     label: 'Deshacer',
-                      //     onPressed: () {
-                      //       // código para deshacer la acción
-                      //     },
-                      //   ),
-                      // );
-
-                      // ScaffoldMessenger.of(context).showSnackBar(snackBar);
                     },
-                    child: const Text('Agregar a cotizacion'),
+                    child: const Text('Agregar al carrito'),
                   ),
                 ),
               ),
