@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:login/pantalla_inicio.dart';
+import 'package:login/screens/pantalla_inicio.dart';
 import 'dart:convert';
-import 'registro.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key}); //super.key es un parametro opcional
@@ -23,6 +22,9 @@ class _LoginViewState extends State<Login> {
 
   Future<String?> authenticateUser(String email, String password) async {
     //funcion asincrona que recibe dos parametros de tipo String
+    //el future es una forma de ejecutar una operacion asincrona y obtener un resultado en el futuro, es decir que no se bloquea el hilo principal
+    //en otras palabras es una operacion que no se ejecuta de manera inmediata pero que se espera se ejecute en algun momento despues de ser llamada
+    //funcion asincrona que recibe dos parametros de tipo String
     try {
       final response = await http.post(
         //variable de tipo http.Response que realiza una peticion POST
@@ -36,17 +38,20 @@ class _LoginViewState extends State<Login> {
           'Content-Type': 'application/json; charset=UTF-8',
         },
       );
-  //imprime en consola el estado de la respuesta y el cuerpo de la respuesta
+      //imprime en consola el estado de la respuesta y el cuerpo de la respuesta
       print('Response status: ${response.statusCode}');
       print('Response body: ${response.body}');
 
       if (response.statusCode == 200) {
-        Map<String, dynamic> data = jsonDecode(response.body); //decodifica el json
-        if (data['authenticated'] == true) { //si el usuario esta autenticado
+        Map<String, dynamic> data =
+            jsonDecode(response.body); //decodifica el json
+        if (data['authenticated'] == true) {
+          //si el usuario esta autenticado
           return data['nombre']; //retorna el nombre del usuario
         }
       }
-    } catch (e) { //captura el error
+    } catch (e) {
+      //captura el error
       print('Error: $e');
     }
 
@@ -60,7 +65,8 @@ class _LoginViewState extends State<Login> {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 60),
           child: Form(
-            key: _formfield, //asigna la variable global _formfield al formulario
+            key:
+                _formfield, //asigna la variable global _formfield al formulario
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
@@ -77,19 +83,22 @@ class _LoginViewState extends State<Login> {
                 const SizedBox(height: 50),
                 TextFormField(
                   keyboardType: TextInputType.emailAddress,
-                  controller: emailController,
+                  controller:
+                      emailController, //un controller es un objeto que permite manipular el campo de texto
                   decoration: const InputDecoration(
                     labelText: "Correo",
                     border: OutlineInputBorder(),
                     prefixIcon: Icon(Icons.email),
                   ),
-                  validator: (value) { //valida el campo de texto
-                    if (value!.isEmpty) { //si el campo esta vacio
+                  validator: (value) {
+                    //valida el campo de texto
+                    if (value!.isEmpty) {
+                      //si el campo esta vacio
                       return 'Ingrese su correo';
                     }
-                    bool emailValid =
-                        RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$') //expresion regular para validar el correo
-                            .hasMatch(value);
+                    bool emailValid = RegExp(
+                            r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$') //expresion regular para validar el correo
+                        .hasMatch(value);
                     if (!emailValid) {
                       return 'Ingrese un correo valido';
                     }
@@ -100,7 +109,7 @@ class _LoginViewState extends State<Login> {
                 TextFormField(
                     keyboardType: TextInputType.visiblePassword,
                     controller: passController,
-                    obscureText: passToggle, 
+                    obscureText: passToggle,
                     decoration: InputDecoration(
                       labelText: "Contraseña",
                       border: const OutlineInputBorder(),
@@ -108,44 +117,55 @@ class _LoginViewState extends State<Login> {
                       suffix: InkWell(
                         onTap: () {
                           setState(() {
-                            passToggle = !passToggle; //muestra u oculta la contraseña
+                            passToggle =
+                                !passToggle; //muestra u oculta la contraseña
                           });
                         },
-                        child: Icon(passToggle //muestra el icono de visibilidad o de ocultar contraseña
-                            ? Icons.visibility
-                            : Icons.visibility_off),
+                        child: Icon(
+                            passToggle //muestra el icono de visibilidad o de ocultar contraseña
+                                ? Icons.visibility
+                                : Icons.visibility_off),
                       ),
                     ),
                     validator: (value) {
-                      if (value!.isEmpty) { //si el campo esta vacio
+                      if (value!.isEmpty) {
+                        //si el campo esta vacio
                         return 'Ingrese su contraseña';
                       }
-                      if (value.length < 8) { //si la contraseña tiene menos de 8 caracteres
+                      if (value.length < 8) {
+                        //si la contraseña tiene menos de 8 caracteres
                         return 'La contraseña debe tener al menos 8 caracteres';
                       }
                       return null;
                     }),
                 const SizedBox(height: 50),
-                GestureDetector( //detecta el gesto
+                GestureDetector(
+                  //detecta el gesto
                   onTap: () async {
-                    if (_formfield.currentState?.validate() ?? false) { //si el formulario es valido
-                      String? nombre = await authenticateUser( //llama a la funcion authenticateUser
+                    if (_formfield.currentState?.validate() ?? false) {
+                      //si el formulario es valido
+                      String? nombre = await authenticateUser(
+                        //llama a la funcion authenticateUser
                         emailController.text, //parametros que recibe la funcion
                         passController.text,
                       );
 
-                      if (nombre != null) { //si el nombre no es nulo
-                        Navigator.pushReplacement( //navega a la pantalla de inicio
+                      if (nombre != null) {
+                        //si el nombre no es nulo
+                        Navigator.pushReplacement(
+                          //navega a la pantalla de inicio
                           context,
                           MaterialPageRoute(
-                            builder: (context) => PantallaInicio( //envia los parametros a la pantalla de inicio
+                            builder: (context) => PantallaInicio(
+                              //envia los parametros a la pantalla de inicio
                               nombre: nombre,
                               email: emailController.text,
                             ),
                           ),
                         );
                       } else {
-                        ScaffoldMessenger.of(context).showSnackBar( //muestra un mensaje emergente
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          //muestra un mensaje emergente
                           const SnackBar(
                               content: Text('Email o contraseña incorrectos')),
                         );
@@ -178,11 +198,7 @@ class _LoginViewState extends State<Login> {
                         style: TextStyle(fontSize: 16)),
                     TextButton(
                       onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const Registro()),
-                        );
+                        Navigator.pushNamed(context, '/registro');
                       },
                       child: const Text(
                         "Registrate",
