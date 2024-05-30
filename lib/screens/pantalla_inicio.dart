@@ -3,8 +3,6 @@ import 'package:http/http.dart'
     as http; // Importa el paquete http para realizar peticiones
 import 'dart:convert';
 
-import 'package:login/screens/pantalla_detalles_producto.dart'; // Importa el paquete de convertir a JSON
-
 Future<List<Map<String, dynamic>>> obtenerProductos({String? categoria}) async {
   // Función para obtener los productos de la base de datos
   try {
