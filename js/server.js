@@ -51,7 +51,7 @@ app.get("/productos", async (req, res) => {
     }
 
     if (nombre) {
-      filter.name = { $regex: new RegExp(`^${nombre}`, "i") };
+      filter.name = { $regex: new RegExp(`${nombre}`, "i") };
     }
 
     console.log("Filter:", filter); // Mostrar el filtro en consola
