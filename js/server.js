@@ -35,8 +35,6 @@ app.get("/data", async (req, res) => {
   }
 });
 
-//puedes ayudarme a comentar el codigo
-
 app.get("/productos", async (req, res) => {
   // Ruta para obtener los productos
   try {
