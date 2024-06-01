@@ -8,7 +8,7 @@ Future<List<Map<String, dynamic>>> obtenerProductos(
   try {
     String url;
     // Build the URL based on the category and name parameters
-    if (categoria != null && categoria != 'Todos') {
+    if (categoria != null && categoria != 'TODOS') {
       url =
           'http://localhost:3000/productos?categoria=${Uri.encodeComponent(categoria)}';
     } else if (nombre != null && nombre.isNotEmpty) {
@@ -57,7 +57,7 @@ class PantallaInicio extends StatefulWidget {
 
 class _PantallaInicio extends State<PantallaInicio> {
   Future<List<Map<String, dynamic>>>? productos;
-  String categoriaSeleccionada = 'Todos';
+  String categoriaSeleccionada = 'TODOS';
   String nombreBusqueda = '';
   List<Map<String, dynamic>> productosEnCarrito = [];
 
@@ -69,7 +69,7 @@ class _PantallaInicio extends State<PantallaInicio> {
 
   void cargarProductosPorCategoria(String? categoria) {
     setState(() {
-      categoriaSeleccionada = categoria ?? 'Todos';
+      categoriaSeleccionada = categoria ?? 'TODOS';
       productos = obtenerProductos(categoria: categoria);
     });
   }
@@ -101,7 +101,7 @@ class _PantallaInicio extends State<PantallaInicio> {
   Widget build(BuildContext context) {
     final busquedaController = TextEditingController();
     final List<String> categorias = [
-      'Todos',
+      'TODOS',
       'BEBIDAS DE PROTEINA',
       'BARRAS DE PROTEINAS',
       'PROTEINAS CERO CARBOHIDRATOS',
@@ -218,7 +218,8 @@ class _PantallaInicio extends State<PantallaInicio> {
               child: TextFormField(
                 controller: busquedaController,
                 decoration: InputDecoration(
-                    labelText: "Buscar producto",
+                    hintText: 'Buscar productos',
+                    border: InputBorder.none,
                     suffix: InkWell(
                       onTap: () {
                         cargarProductosPorNombre(busquedaController.text); 
