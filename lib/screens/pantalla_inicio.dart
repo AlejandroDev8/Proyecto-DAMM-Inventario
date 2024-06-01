@@ -222,7 +222,7 @@ class _PantallaInicio extends State<PantallaInicio> {
                     border: InputBorder.none,
                     suffix: InkWell(
                       onTap: () {
-                        cargarProductosPorNombre(busquedaController.text); 
+                        cargarProductosPorNombre(busquedaController.text);
                       },
                       child: const Icon(Icons.search),
                     )),
@@ -329,7 +329,7 @@ class _TarjetaProducto extends State<TarjetaProducto> {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap:(){
+      onTap: () {
         Navigator.pushNamed(
           context,
           '/detalles_producto',
@@ -346,31 +346,31 @@ class _TarjetaProducto extends State<TarjetaProducto> {
             children: <Widget>[
               Center(
                 child: ClipRRect(
-                  borderRadius:const BorderRadius.only(
+                  borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(15),
                     topRight: Radius.circular(15),
                   ),
                   child: Image.network(
-                      widget.producto['imagen'],
-                      height: 100,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return const Icon(Icons.broken_image, size: 100);
-                      },
-                    ),
+                    widget.producto['imagen'],
+                    height: 100,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return const Icon(Icons.broken_image, size: 100);
+                    },
+                  ),
                 ),
               ),
               Padding(
-                  padding: const EdgeInsets.all(5.0),
-                  child: Text(
-                    widget.producto['nombre'] ?? 'Nombre no disponible',
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                    ),
+                padding: const EdgeInsets.all(5.0),
+                child: Text(
+                  widget.producto['nombre'] ?? 'Nombre no disponible',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
+              ),
               Padding(
                 padding: const EdgeInsets.all(5.0),
                 child: Row(
@@ -423,11 +423,23 @@ class _TarjetaProducto extends State<TarjetaProducto> {
                 padding: const EdgeInsets.all(1.0),
                 child: Center(
                   child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blueAccent,
+                    ),
                     onPressed: () {
                       widget.agregarProductoACotizacion(
                           widget.producto, cantidad);
+
+                      final snackBar = SnackBar(
+                        content: const Text(
+                            'Producto añadido a la cotización correctamente'),
+                      );
+
+                      ScaffoldMessenger.of(context).showSnackBar(snackBar);
                     },
-                    child: const Text('Agregar al carrito'),
+                    child: const Text('Agregar a cotización',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, color: Colors.white)),
                   ),
                 ),
               ),
