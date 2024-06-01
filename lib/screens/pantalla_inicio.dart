@@ -107,7 +107,14 @@ class _PantallaInicio extends State<PantallaInicio> {
       'PROTEINAS CERO CARBOHIDRATOS',
       'PROTEINAS MASS',
       'PROTEINAS VEGANAS',
-      'PROTEINAS DE SUERO DE LECHE'
+      'PROTEINAS DE SUERO DE LECHE',
+      'ALIMENTOS',
+      'SUPERFOODS',
+      'MINERALES',
+      'MULTIVITAMINAS',
+      'VITAMINAS',
+      'ACCESORIOS',
+      'SHAKERS',
     ];
     List<ListTile> tiles = [
       ListTile(
@@ -354,7 +361,7 @@ class _TarjetaProducto extends State<TarjetaProducto> {
                 ),
               ),
               Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.all(5.0),
                   child: Text(
                     widget.producto['nombre'] ?? 'Nombre no disponible',
                     style: const TextStyle(
@@ -364,7 +371,7 @@ class _TarjetaProducto extends State<TarjetaProducto> {
                   ),
                 ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(5.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -412,7 +419,7 @@ class _TarjetaProducto extends State<TarjetaProducto> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(3.0),
+                padding: const EdgeInsets.all(1.0),
                 child: Center(
                   child: ElevatedButton(
                     onPressed: () {
